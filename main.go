@@ -33,6 +33,26 @@ func logToFile(filename, text string) {
 	logf.Sync()
 }
 
+func logIt(host, app, text string, level int) {
+	logs := "logs"
+	hostlogs := filepath.Join(logs, host)
+	applogs := filepath.Join(hostlogs, app)
+
+	logToFile(applogs+".log", text)
+	logToFile(hostlogs+".log", text)
+
+	switch level {
+	case 4:
+		logToFile(applogs+"_warning.log", text)
+		logToFile(hostlogs+"_warning.log", text)
+		logToFile(filepath.Join(logs, "warning.log"), text)
+	case 3:
+		logToFile(applogs+"_error.log", text)
+		logToFile(hostlogs+"_error.log", text)
+		logToFile(filepath.Join(logs, "error.log"), text)
+	}
+}
+
 func main() {
 	channel := make(syslog.LogPartsChannel)
 	handler := syslog.NewChannelHandler(channel)
@@ -59,25 +79,10 @@ func main() {
 			app = sanitize.BaseName(app)
 			timestamp := logParts["timestamp"].(time.Time)
 			hostname := sanitize.BaseName(logParts["hostname"].(string))
-			logs := "logs"
-			hostlogs := filepath.Join(logs, hostname)
-			filename := filepath.Join(hostlogs, app)
 
 			logtext := fmt.Sprintf("%s %s\n", timestamp.Format("Mon Jan 2 2006 15:04:05"), text)
-			fmt.Println(logtext)
-			logToFile(filename+".log", logtext)
-			logToFile(hostlogs+".log", logtext)
-
-			switch logParts["severity"].(int) {
-			case 4:
-				logToFile(filename+"_warning.log", logtext)
-				logToFile(hostlogs+"_warning.log", logtext)
-				logToFile(filepath.Join(logs, "warning.log"), logtext)
-			case 3:
-				logToFile(filename+"_error.log", logtext)
-				logToFile(hostlogs+"_error.log", logtext)
-				logToFile(filepath.Join(logs, "error.log"), logtext)
-			}
+			fmt.Print(logtext)
+			logIt(hostname, app, logtext, logParts["severity"].(int))
 		}
 	}(channel)
 
