@@ -76,6 +76,7 @@ func main() {
 				text = strings.Join(strings.Split(text, " ")[3:], " ")
 			}
 
+			text = strings.TrimSpace(text)
 			app = sanitize.BaseName(app)
 			timestamp := logParts["timestamp"].(time.Time)
 			hostname := sanitize.BaseName(logParts["hostname"].(string))
