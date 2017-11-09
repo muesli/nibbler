@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -77,11 +78,26 @@ func main() {
 			}
 
 			text = strings.TrimSpace(text)
+			logjson := make(map[string]interface{})
+			err := json.Unmarshal([]byte(text), &logjson)
+			if err != nil {
+				fmt.Println("Could not decode log message as JSON:", text)
+				continue
+			}
+
 			app = sanitize.BaseName(app)
 			timestamp := logParts["timestamp"].(time.Time)
 			hostname := sanitize.BaseName(logParts["hostname"].(string))
 
-			logtext := fmt.Sprintf("%s %s\n", timestamp.Format("Mon Jan 2 2006 15:04:05"), text)
+			logmsg := logjson["msg"].(string)
+			for k, v := range logjson {
+				if k == "time" || k == "level" || k == "msg" {
+					continue
+				}
+				logmsg += fmt.Sprintf(" %s=%s", k, v)
+			}
+
+			logtext := fmt.Sprintf("%s %s\n", timestamp.Format("Mon Jan 2 2006 15:04:05"), logmsg)
 			fmt.Print(logtext)
 			logIt(hostname, app, logtext, logParts["severity"].(int))
 		}
