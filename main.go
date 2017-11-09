@@ -63,8 +63,8 @@ func main() {
 			hostlogs := filepath.Join(logs, hostname)
 			filename := filepath.Join(hostlogs, app)
 
-			logtext := fmt.Sprintf("%s %s\n", timestamp, text)
-			fmt.Println(text)
+			logtext := fmt.Sprintf("%s %s\n", timestamp.Format("Mon Jan 2 2006 15:04:05"), text)
+			fmt.Println(logtext)
 			logToFile(filename+".log", logtext)
 			logToFile(hostlogs+".log", logtext)
 
