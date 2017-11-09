@@ -94,7 +94,7 @@ func main() {
 				if k == "time" || k == "level" || k == "msg" {
 					continue
 				}
-				logmsg += fmt.Sprintf(" %s=%s", k, v)
+				logmsg += fmt.Sprintf(" %s=%s", k, fmt.Sprint(v))
 			}
 
 			logtext := fmt.Sprintf("%s %s\n", timestamp.Format("Mon Jan 2 2006 15:04:05"), logmsg)
